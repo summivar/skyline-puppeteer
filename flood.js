@@ -47,11 +47,12 @@ const takingTickets = async () => {
   while (isFreePlaces) {
     console.time('Running browser');
     const browser = await puppeteer.launch({
-      headless: false,
+      headless: 'new',
       args: [
         '--disable-web-security',
         '--disable-features=IsolateOrigins',
-        '--disable-site-isolation-trials'
+        '--disable-site-isolation-trials',
+        '--disable-features=site-per-process'
       ]
     });
     console.timeEnd('Running browser');
