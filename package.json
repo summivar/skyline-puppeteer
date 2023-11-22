@@ -1,0 +1,13 @@
+{
+  "name": "skyline-puppeteer",
+  "version": "0.0.1",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "dependencies": {
+    "date-fns": "^2.30.0",
+    "puppeteer": "^21.4.1"
+  }
+}
