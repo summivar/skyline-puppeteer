@@ -45,6 +45,7 @@ const takingTickets = async () => {
   getFloodingData();
 
   while (isFreePlaces) {
+    console.time('Running browser');
     const browser = await puppeteer.launch({
       headless: false,
       args: [
@@ -53,10 +54,12 @@ const takingTickets = async () => {
         '--disable-site-isolation-trials'
       ]
     });
+    console.timeEnd('Running browser');
 
     const page = await browser.newPage();
     await page.goto(floodingData.href);
     await page.setViewport({width: 1920, height: 1080});
+    console.log('Go to page');
 
     await page.waitForSelector(yourTownListCloseButtonSelector);
     await page.click(yourTownListCloseButtonSelector);
@@ -77,8 +80,9 @@ const takingTickets = async () => {
         break;
       }
     }
-
     await page.click(filterDaySelector);
+
+    console.log('Chosen day');
 
     await page.waitForSelector(filmSessionsSelector);
     const filmSessions = await page.$$(filmSessionsSelector);
@@ -95,7 +99,10 @@ const takingTickets = async () => {
         }
       }
     }
+    console.log('Find session');
+    console.time('Waiting iframe')
     const iframe = await waitForFrame(page, 'widget-new.premierzal.ru');
+    console.timeEnd('Waiting iframe');
 
     try {
       await iframe.waitForSelector('.place-wrapper', {timeout: 10000});
@@ -103,6 +110,8 @@ const takingTickets = async () => {
       console.error('Not found .place-wrapper');
       process.exit(1);
     }
+
+    console.log('Waited place-wrapper');
 
     let places = [];
 
@@ -114,7 +123,10 @@ const takingTickets = async () => {
       break;
     }
 
+    console.log('Waited place-wrapper not reserved');
+
     let index = 0;
+    console.log('Start clicking');
     while ((await iframe.$$('div.place-wrapper.added')).length < 6 && index < places.length - 1) {
       if (index > 0) {
         const place = places[index];
@@ -141,6 +153,8 @@ const takingTickets = async () => {
         index++;
       }
     }
+    console.log('Ended clicking');
+    console.log('Buy tickets');
     try {
       await iframe.waitForSelector('div.basket-btn', {timeout: 1000});
       const btn = await iframe.$('div.basket-btn');
@@ -162,6 +176,7 @@ const takingTickets = async () => {
         isFreePlaces = false;
       }
       await browser.close();
+      console.log('Ended buying');
     }
   }
   setTimeout(takingTickets, minute * seconds * millisecond); // 15min * 60sec * 1000ms -> convert 15 min to ms
